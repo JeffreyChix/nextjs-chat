@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useSession, signIn, SignInOptions } from "next-auth/react";
+import { GOOGLE_CLIENT_ID } from "@/google";
 
 interface OneTapSigninOptions {
   parentContainerId?: string;
@@ -21,7 +22,7 @@ export const useOneTapSignin = (
         const { google } = window as unknown as any;
         if (google) {
           google.accounts.id.initialize({
-            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+            client_id: GOOGLE_CLIENT_ID!,
             // auto_select: true, // TODO: Uncomment this line if you want to skip the one tap UI
             callback: async (response: any) => {
               setIsLoading(true);
