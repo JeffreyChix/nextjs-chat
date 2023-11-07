@@ -2,11 +2,8 @@ import NextAuth, { type DefaultSession } from 'next-auth'
 import GitHub from 'next-auth/providers/github'
 import Google from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
-// import { OAuth2Client } from 'google-auth-library'
 
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from './google'
-
-// const googleAuthClient = new OAuth2Client(GOOGLE_CLIENT_ID)
 
 declare module 'next-auth' {
   interface Session {
@@ -25,27 +22,27 @@ export const {
   providers: [
     GitHub,
     Google({ clientId: GOOGLE_CLIENT_ID, clientSecret: GOOGLE_CLIENT_SECRET }),
-    // CredentialsProvider({
-    //   id: 'googleonetap',
-    //   name: 'google-one-tap',
-    //   credentials: {
-    //     credential: { type: 'text' }
-    //   },
-    //   authorize: async credentials => {
-    //     const token = credentials?.credential
-    //     const ticket = await googleAuthClient.verifyIdToken({
-    //       idToken: token,
-    //       audience: GOOGLE_CLIENT_ID
-    //     })
-    //     const user = ticket.getPayload() // This is the user
+    CredentialsProvider({
+      id: 'googleonetap',
+      name: 'google-one-tap',
+      credentials: {
+        credential: { type: 'text' }
+      },
+      authorize: async credentials => {
+        const token = credentials?.credential
+        const response = await fetch(
+          `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`
+        )
 
-    //     if (!user) {
-    //       throw new Error('Cannot extract payload from signin token')
-    //     }
+        const user = await response.json()
 
-    //     return user as any
-    //   }
-    // })
+        if (!user) {
+          throw new Error('Cannot extract payload from signin token')
+        }
+
+        return user as any
+      }
+    })
   ],
   callbacks: {
     jwt({ token, profile, user, account }) {
@@ -54,6 +51,13 @@ export const {
         token.image = profile.picture
         token.provider = account?.provider
       }
+
+      if (user && !profile) {
+        token.id = user?.id ?? user?.sub
+        token.image = user?.picture
+        token.provider = account?.provider
+      }
+      
       return token
     },
     authorized({ auth }) {
