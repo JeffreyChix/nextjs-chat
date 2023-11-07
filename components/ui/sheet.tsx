@@ -13,12 +13,11 @@ const SheetTrigger = SheetPrimitive.Trigger
 const SheetClose = SheetPrimitive.Close
 
 const SheetPortal = ({
-  className,
   children,
   ...props
 }: SheetPrimitive.DialogPortalProps) => (
   <SheetPrimitive.Portal
-    className={cn('fixed inset-0 z-50 flex', className)}
+    // className={cn('fixed inset-0 z-50 flex', )}
     {...props}
   >
     {children}
