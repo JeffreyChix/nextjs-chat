@@ -2,6 +2,9 @@
 module.exports = {
   reactStrictMode: true,
   experimental: {
-    serverActions: true,
+    serverActions: true
   },
-};
+  images: {
+    domains: ['lh3.googleusercontent.com']
+  }
+}

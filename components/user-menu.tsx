@@ -32,7 +32,9 @@ export function UserMenu({ user }: UserMenuProps) {
             {user?.image ? (
               <Image
                 className="w-6 h-6 transition-opacity duration-300 rounded-full select-none ring-1 ring-zinc-100/10 hover:opacity-80"
-                src={user?.image ? `${user.image}&s=60` : ''}
+                src={user?.image}
+                width={40}
+                height={40}
                 alt={user.name ?? 'Avatar'}
               />
             ) : (
@@ -54,7 +56,7 @@ export function UserMenu({ user }: UserMenuProps) {
               href="https://vercel.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-between w-full text-xs"
+              className="inline-flex items-center justify-between w-full text-xs cursor-pointer"
             >
               Vercel Homepage
               <IconExternalLink className="w-3 h-3 ml-auto" />
@@ -66,7 +68,7 @@ export function UserMenu({ user }: UserMenuProps) {
                 callbackUrl: '/'
               })
             }
-            className="text-xs"
+            className="text-xs cursor-pointer"
           >
             Log Out
           </DropdownMenuItem>
