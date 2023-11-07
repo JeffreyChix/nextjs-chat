@@ -27,7 +27,7 @@ export const {
       if (profile) {
         token.id = profile.id ?? user?.id
         token.image = profile.picture
-        token.provider = account?.provider;
+        token.provider = account?.provider
       }
       return token
     },
