@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { TailwindIndicator } from '@/components/tailwind-indicator'
 import { Providers } from '@/components/providers'
 import { Header } from '@/components/header'
+import { OneTapComponent } from '@/components/ui/one-tap'
 
 export const metadata: Metadata = {
   title: {
@@ -33,7 +34,9 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head />
+      <head>
+        <script src="https://accounts.google.com/gsi/client" async defer />
+      </head>
       <body
         className={cn(
           'font-sans antialiased',
@@ -43,6 +46,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       >
         <Toaster />
         <Providers attribute="class" defaultTheme="system" enableSystem>
+          <OneTapComponent />
           <div className="flex flex-col min-h-screen">
             {/* @ts-ignore */}
             <Header />
