@@ -53,8 +53,9 @@ export const {
       }
 
       if (user && !profile) {
-        token.id = user?.id ?? user?.sub
-        token.image = user?.picture
+        const _user = user as unknown as any;
+        token.id = _user?.id ?? _user?.sub
+        token.image = _user?.picture
         token.provider = account?.provider
       }
       
