@@ -13,8 +13,6 @@ export const useOneTapSignin = (
   const { parentContainerId } = options || {}
   const [isLoading, setIsLoading] = useState(false)
 
-  // Taking advantage in recent development of useSession hook.
-  // If user is unauthenticated, google one tap ui is initialized and rendered
   const { status } = useSession({
     required: true,
     onUnauthenticated() {
@@ -37,8 +35,6 @@ export const useOneTapSignin = (
             prompt_parent_id: parentContainerId
           })
 
-          // Here we just console.log some error situations and reason why the google one tap
-          // is not displayed. You may want to handle it depending on yuor application
           google.accounts.id.prompt((notification: any) => {
             if (notification.isNotDisplayed()) {
               console.log(
