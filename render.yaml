@@ -1,0 +1,6 @@
+services:
+  - type: web
+    routes:
+      - type: redirect
+        source: /
+        destination: ${NEXT_PUBLIC_AUTH_URL}
