@@ -16,8 +16,7 @@ declare module 'next-auth' {
 
 export const {
   handlers: { GET, POST },
-  auth,
-  CSRF_experimental // will be removed in future
+  auth
 } = NextAuth({
   providers: [
     GitHub,
@@ -74,6 +73,13 @@ export const {
     authorized({ auth }) {
       return !!auth?.user // this ensures there is a logged in user for -every- request
     },
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith('/')) return `${baseUrl}${url}`
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
+    }
   },
   pages: {
     signIn: '/sign-in' // overrides the next-auth default signin page https://authjs.dev/guides/basics/pages

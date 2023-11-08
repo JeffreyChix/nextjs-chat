@@ -46,7 +46,6 @@ export const useGoogleIdentify = (props: GoogleIndentifyProps) => {
 
             await signIn('googleonetap', {
               credential: response.credential,
-              callbackUrl: process.env.NEXT_PUBLIC_AUTH_URL,
               ...nextAuthOpt
             })
             setIsLoading(false)

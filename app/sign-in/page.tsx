@@ -8,11 +8,11 @@ export default async function SignInPage() {
   if (session?.user) {
     redirect('/')
   }
-  
+
   return (
     <div className="flex h-[calc(100vh-theme(spacing.16))] items-center justify-center py-10 gap-5">
       <LoginButton />
-      <LoginButton text='Login with Google' provider='GOOGLE' />
+      <LoginButton text="Login with Google" provider="GOOGLE" />
     </div>
   )
 }
