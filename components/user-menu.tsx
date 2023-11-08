@@ -65,7 +65,7 @@ export function UserMenu({ user }: UserMenuProps) {
           <DropdownMenuItem
             onClick={() => {
               signOut({
-                callbackUrl: '/'
+                callbackUrl: process.env.NEXT_PUBLIC_AUTH_URL
               })
               sessionStorage.setItem('auth___status', 'signed_out')
             }}
