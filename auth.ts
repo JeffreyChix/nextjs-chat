@@ -73,6 +73,14 @@ export const {
     },
     authorized({ auth }) {
       return !!auth?.user // this ensures there is a logged in user for -every- request
+    },
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      console.log('URL => ', url, 'BASE URL =>', baseUrl)
+      if (url.startsWith('/')) return `${baseUrl}${url}`
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
     }
   },
   pages: {
