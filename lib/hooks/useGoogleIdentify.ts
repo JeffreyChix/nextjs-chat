@@ -15,9 +15,12 @@ interface GoogleIndentifyProps {
 
 export const useGoogleIdentify = (props: GoogleIndentifyProps) => {
   const URL = 'https://accounts.google.com/gsi/client'
+
   const { data: session } = useSession()
+
   const [isLoading, setIsLoading] = useState(false)
   const [isSignedIn, setIsSignedIn] = useState(false)
+
   const { nextAuthOpt, googleOpt } = props || {}
 
   useEffect(() => {
@@ -27,14 +30,14 @@ export const useGoogleIdentify = (props: GoogleIndentifyProps) => {
   }, [session])
 
   const initiateGoogleOneTap = useCallback(() => {
-    let script = document.createElement('script')
+    const script = document.createElement('script')
     script.async = true
     script.src = URL
     document.head.appendChild(script)
 
     const persistedAuthStatus = sessionStorage.getItem('auth___status')
 
-    if (!isLoading && !isSignedIn) {
+    if (!isLoading && !isSignedIn && persistedAuthStatus !== 'signed_in') {
       const { google } = window as any
 
       if (google) {
