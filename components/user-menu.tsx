@@ -63,12 +63,13 @@ export function UserMenu({ user }: UserMenuProps) {
             </a>
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() =>
+            onClick={() => {
               signOut({
                 callbackUrl: '/'
               })
-            }
-            className="text-xs cursor-pointer"
+              sessionStorage.setItem('auth___status', 'signed_out')
+            }}
+            className="g_id_signout text-xs cursor-pointer"
           >
             Log Out
           </DropdownMenuItem>

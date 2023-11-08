@@ -44,6 +44,16 @@ export const {
       }
     })
   ],
+  secret: process.env.NEXT_PUBLIC_AUTH_SECRET,
+  session: {
+    strategy: 'jwt'
+  },
+  jwt: {
+    secret: process.env.NEXT_PUBLIC_AUTH_SECRET
+  },
+  theme: {
+    colorScheme: 'light'
+  },
   callbacks: {
     jwt({ token, profile, user, account }) {
       if (profile) {
@@ -53,12 +63,12 @@ export const {
       }
 
       if (user && !profile) {
-        const _user = user as unknown as any;
+        const _user = user as unknown as any
         token.id = _user?.id ?? _user?.sub
         token.image = _user?.picture
         token.provider = account?.provider
       }
-      
+
       return token
     },
     authorized({ auth }) {
