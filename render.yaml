@@ -1,6 +1,6 @@
 services:
   - type: web
     routes:
-      - type: redirect
+      - type: rewrite
         source: /
         destination: https://nextjs-chatbot-59ow.onrender.com
