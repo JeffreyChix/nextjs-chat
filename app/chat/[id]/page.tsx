@@ -26,15 +26,16 @@ export async function generateMetadata({
     return {}
   }
 
-  const chat = await CHAT_SERVICE.MAKE_REQUEST({
-    id: params.id,
-    key: CHAT_REQUEST_KEYS.GET_CHAT,
-    method: 'GET',
-    headers: headers()
-  })
+  // const chat = await CHAT_SERVICE.MAKE_REQUEST({
+  //   id: params.id,
+  //   key: CHAT_REQUEST_KEYS.GET_CHAT,
+  //   method: 'GET',
+  //   headers: headers()
+  // })
 
   return {
-    title: chat?.title.toString().slice(0, 50) ?? 'Chat'
+    // title: chat?.title.toString().slice(0, 50) ?? 'Chat'
+    title: "Chat"
   }
 }
 
