@@ -2,8 +2,9 @@ import { type Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 
 import { auth } from '@/auth'
-import { getChat } from '@/app/actions'
 import { Chat } from '@/components/chat'
+import { CHAT_SERVICE } from '@/service/chat'
+import { CHAT_REQUEST_KEYS } from '@/lib/types'
 
 export const runtime = 'edge'
 export const preferredRegion = 'home'
@@ -23,7 +24,12 @@ export async function generateMetadata({
     return {}
   }
 
-  const chat = await getChat(params.id, session.user.id)
+  const chat = await CHAT_SERVICE.MAKE_REQUEST({
+    id: params.id,
+    key: CHAT_REQUEST_KEYS.GET_CHAT,
+    method: 'GET'
+  })
+
   return {
     title: chat?.title.toString().slice(0, 50) ?? 'Chat'
   }
@@ -36,7 +42,11 @@ export default async function ChatPage({ params }: ChatPageProps) {
     redirect(`/sign-in?next=/chat/${params.id}`)
   }
 
-  const chat = await getChat(params.id, session.user.id)
+  const chat = await CHAT_SERVICE.MAKE_REQUEST({
+    id: params.id,
+    key: CHAT_REQUEST_KEYS.GET_CHAT,
+    method: 'GET'
+  })
 
   if (!chat) {
     notFound()
@@ -46,5 +56,5 @@ export default async function ChatPage({ params }: ChatPageProps) {
     notFound()
   }
 
-  return <Chat id={chat.id} initialMessages={chat.messages} />
+  return <Chat id={chat._id} initialMessages={chat.messages} />
 }

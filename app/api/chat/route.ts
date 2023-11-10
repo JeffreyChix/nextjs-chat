@@ -1,11 +1,12 @@
-import { kv } from '@vercel/kv'
+import mongoose from 'mongoose'
 import { OpenAIStream, StreamingTextResponse } from 'ai'
 import { Configuration, OpenAIApi } from 'openai-edge'
 
 import { auth } from '@/auth'
-import { nanoid } from '@/lib/utils'
-
-export const runtime = 'edge'
+import { CHAT_REQUEST_KEYS } from '@/lib/types'
+import { connectToDB } from '@/lib/connectToMongoDB'
+import { getChat, getChats, removeChat, clearChats } from '@/app/actions'
+import ChatModel from '@/model/chat'
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY
@@ -13,11 +14,27 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration)
 
-export async function POST(req: Request) {
-  const json = await req.json()
-  const { messages, previewToken } = json
+const prepParams = async (req: Request) => {
+  if (req.method.toUpperCase() === 'GET') {
+    const requestUrl = new URL(req.url)
+    const id = requestUrl.searchParams.get('id')
+    const key = requestUrl.searchParams.get('key')
 
+    return { id, key }
+  }
+
+  const json = await req.json()
+
+  return json
+}
+
+export async function POST(req: Request) {
+  await connectToDB()
+
+  const json = await prepParams(req)
   const userId = (await auth())?.user.id
+
+  const { messages, previewToken } = json
 
   if (!userId) {
     return new Response('Unauthorized', {
@@ -39,15 +56,10 @@ export async function POST(req: Request) {
   const stream = OpenAIStream(res, {
     async onCompletion(completion) {
       const title = json.messages[0].content.substring(0, 100)
-      const id = json.id ?? nanoid()
-      const createdAt = Date.now()
-      const path = `/chat/${id}`
+
       const payload = {
-        id,
         title,
-        userId,
-        createdAt,
-        path,
+        userId: new mongoose.Types.ObjectId(userId),
         messages: [
           ...messages,
           {
@@ -56,13 +68,51 @@ export async function POST(req: Request) {
           }
         ]
       }
-      await kv.hmset(`chat:${id}`, payload)
-      await kv.zadd(`user:chat:${userId}`, {
-        score: createdAt,
-        member: `chat:${id}`
-      })
+
+      await ChatModel.findOneAndUpdate()
     }
   })
 
   return new StreamingTextResponse(stream)
+}
+
+export async function GET(req: Request) {
+  await connectToDB()
+
+  const json = await prepParams(req)
+  const userId = (await auth())?.user.id
+
+  switch (json.key) {
+    case CHAT_REQUEST_KEYS.GET_CHAT: {
+      const data = await getChat(json.id, userId)
+
+      return Response.json(data)
+    }
+
+    case CHAT_REQUEST_KEYS.GET_CHATS: {
+      const data = await getChats(userId)
+
+      return Response.json(data)
+    }
+  }
+}
+
+export async function DELETE(req: Request) {
+  await connectToDB()
+
+  const json = await prepParams(req)
+
+  switch (json.key) {
+    case CHAT_REQUEST_KEYS.REMOVE_CHAT: {
+      const data = await removeChat(json.id)
+
+      return Response.json(data)
+    }
+
+    case CHAT_REQUEST_KEYS.CLEAR_CHATS: {
+      const data = await clearChats()
+
+      return Response.json(data)
+    }
+  }
 }

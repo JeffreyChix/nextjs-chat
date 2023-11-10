@@ -1,10 +1,11 @@
 'use client'
 
 import * as React from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, redirect } from 'next/navigation'
 import { toast } from 'react-hot-toast'
+import { revalidatePath } from 'next/cache'
 
-import { type Chat, ServerActionResult } from '@/lib/types'
+import { CHAT_REQUEST_KEYS, type Chat } from '@/lib/types'
 import { cn, formatDate } from '@/lib/utils'
 import {
   AlertDialog,
@@ -25,11 +26,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import {
-  IconSpinner,
-  IconTrash,
-  IconUsers
-} from '@/components/ui/icons'
+import { IconSpinner, IconTrash, IconUsers } from '@/components/ui/icons'
 import Link from 'next/link'
 import { badgeVariants } from '@/components/ui/badge'
 import {
@@ -37,16 +34,13 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import { CHAT_SERVICE } from '@/service/chat'
 
 interface SidebarActionsProps {
   chat: Chat
-  removeChat: (args: { id: string; path: string }) => ServerActionResult<void>
 }
 
-export function SidebarActions({
-  chat,
-  removeChat,
-}: SidebarActionsProps) {
+export function SidebarActions({ chat }: SidebarActionsProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [isRemovePending, startRemoveTransition] = React.useTransition()
   const router = useRouter()
@@ -88,9 +82,10 @@ export function SidebarActions({
               onClick={event => {
                 event.preventDefault()
                 startRemoveTransition(async () => {
-                  const result = await removeChat({
-                    id: chat.id,
-                    path: chat.path
+                  const result = await CHAT_SERVICE.MAKE_REQUEST({
+                    id: chat._id,
+                    key: CHAT_REQUEST_KEYS.REMOVE_CHAT,
+                    method: 'DELETE'
                   })
 
                   if (result && 'error' in result) {
@@ -99,9 +94,11 @@ export function SidebarActions({
                   }
 
                   setDeleteDialogOpen(false)
-                  router.refresh()
-                  router.push('/')
-                  toast.success('Chat deleted')
+                  // router.refresh()
+                  // router.push('/')
+                  toast.success('Chat deleted!')
+                  revalidatePath('/')
+                  revalidatePath(chat.path)
                 })
               }}
             >

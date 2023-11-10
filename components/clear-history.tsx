@@ -2,9 +2,10 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { toast } from 'react-hot-toast'
 
-import { ServerActionResult } from '@/lib/types'
+import { CHAT_REQUEST_KEYS } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import {
   AlertDialog,
@@ -18,12 +19,9 @@ import {
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
 import { IconSpinner } from '@/components/ui/icons'
+import { CHAT_SERVICE } from '@/service/chat'
 
-interface ClearHistoryProps {
-  clearChats: () => ServerActionResult<void>
-}
-
-export function ClearHistory({ clearChats }: ClearHistoryProps) {
+export function ClearHistory() {
   const [open, setOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
   const router = useRouter()
@@ -51,7 +49,10 @@ export function ClearHistory({ clearChats }: ClearHistoryProps) {
             onClick={event => {
               event.preventDefault()
               startTransition(async () => {
-                const result = await clearChats()
+                const result = await CHAT_SERVICE.MAKE_REQUEST({
+                  key: CHAT_REQUEST_KEYS.CLEAR_CHATS,
+                  method: 'DELETE'
+                })
 
                 if (result && 'error' in result) {
                   toast.error(result.error)
@@ -60,6 +61,7 @@ export function ClearHistory({ clearChats }: ClearHistoryProps) {
 
                 setOpen(false)
                 router.push('/')
+                revalidatePath('/')
               })
             }}
           >

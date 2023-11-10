@@ -1,13 +1,13 @@
-import { getChats, removeChat } from '@/app/actions'
 import { SidebarActions } from '@/components/sidebar-actions'
 import { SidebarItem } from '@/components/sidebar-item'
+import { CHAT_SERVICE } from '@/service/chat'
+import { CHAT_REQUEST_KEYS, Chat } from '@/lib/types'
 
-export interface SidebarListProps {
-  userId?: string
-}
-
-export async function SidebarList({ userId }: SidebarListProps) {
-  const chats = await getChats(userId)
+export async function SidebarList() {
+  const chats = (await CHAT_SERVICE.MAKE_REQUEST({
+    key: CHAT_REQUEST_KEYS.GET_CHATS,
+    method: 'GET'
+  })) as Chat[]
 
   return (
     <div className="flex-1 overflow-auto">
@@ -16,11 +16,8 @@ export async function SidebarList({ userId }: SidebarListProps) {
           {chats.map(
             chat =>
               chat && (
-                <SidebarItem key={chat?.id} chat={chat}>
-                  <SidebarActions
-                    chat={chat}
-                    removeChat={removeChat}
-                  />
+                <SidebarItem key={chat?._id} chat={chat}>
+                  <SidebarActions chat={chat} />
                 </SidebarItem>
               )
           )}

@@ -4,6 +4,7 @@ import Google from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from './google'
+import { USER_SERVICE } from './service/user'
 
 declare module 'next-auth' {
   interface Session {
@@ -54,34 +55,34 @@ export const {
     colorScheme: 'light'
   },
   callbacks: {
-    jwt({ token, profile, user, account }) {
+    async jwt({ token, profile, user, account }) {
+      const updatedUser = await USER_SERVICE.DB_UPDATE_USER({
+        user,
+        account,
+        profile
+      })
+
+      if (updatedUser && updatedUser?._id) {
+        token.id = updatedUser._id
+      }
+
       if (profile) {
-        token.id = profile.id ?? user?.id
-        token.image = profile.picture
+        token.image = profile?.picture ?? profile?.avatar_url
         token.provider = account?.provider
       }
 
       if (user && !profile) {
-        const _user = user as unknown as any
-        token.id = _user?.id ?? _user?.sub
-        token.image = _user?.picture
+        token.image = (user as any)?.picture
         token.provider = account?.provider
       }
 
       return token
     },
     authorized({ auth }) {
-      return !!auth?.user // this ensures there is a logged in user for -every- request
-    },
-    async redirect({ url, baseUrl }) {
-      // Allows relative callback URLs
-      if (url.startsWith('/')) return `${baseUrl}${url}`
-      // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url
-      return baseUrl
+      return !!auth?.user
     }
   },
   pages: {
-    signIn: '/sign-in' // overrides the next-auth default signin page https://authjs.dev/guides/basics/pages
+    signIn: '/sign-in'
   }
 })
