@@ -13,7 +13,7 @@ export const CHAT_SERVICE = {
     id,
     key,
     method,
-    headers = { 'Content-Type': 'application/json' }
+    headers
   }: Param) {
     const endpoint = new URL(`${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/chat`)
 
