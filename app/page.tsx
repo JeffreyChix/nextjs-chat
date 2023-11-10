@@ -1,10 +1,8 @@
-import { nanoid } from '@/lib/utils'
 import { Chat } from '@/components/chat'
-
-export const runtime = 'edge'
+import mongoose from 'mongoose'
 
 export default function IndexPage() {
-  const id = nanoid()
+  const id = new mongoose.Types.ObjectId()
 
-  return <Chat id={id} />
+  return <Chat id={id.toString()} />
 }

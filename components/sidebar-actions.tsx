@@ -1,9 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { useRouter, redirect } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
-import { revalidatePath } from 'next/cache'
 
 import { CHAT_REQUEST_KEYS, type Chat } from '@/lib/types'
 import { cn, formatDate } from '@/lib/utils'
@@ -88,17 +87,15 @@ export function SidebarActions({ chat }: SidebarActionsProps) {
                     method: 'DELETE'
                   })
 
-                  if (result && 'error' in result) {
+                  if (typeof result !== 'boolean' && 'error' in result) {
                     toast.error(result.error)
                     return
                   }
 
                   setDeleteDialogOpen(false)
-                  // router.refresh()
-                  // router.push('/')
+                  router.refresh()
+                  router.push('/')
                   toast.success('Chat deleted!')
-                  revalidatePath('/')
-                  revalidatePath(chat.path)
                 })
               }}
             >

@@ -1,3 +1,5 @@
+import { headers } from 'next/headers'
+
 import { SidebarActions } from '@/components/sidebar-actions'
 import { SidebarItem } from '@/components/sidebar-item'
 import { CHAT_SERVICE } from '@/service/chat'
@@ -6,7 +8,8 @@ import { CHAT_REQUEST_KEYS, Chat } from '@/lib/types'
 export async function SidebarList() {
   const chats = (await CHAT_SERVICE.MAKE_REQUEST({
     key: CHAT_REQUEST_KEYS.GET_CHATS,
-    method: 'GET'
+    method: 'GET',
+    headers: headers()
   })) as Chat[]
 
   return (

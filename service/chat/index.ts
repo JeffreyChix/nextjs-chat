@@ -5,13 +5,19 @@ type Param = {
   userId?: string
   key: CHAT_REQUEST_KEYS
   method: 'POST' | 'GET' | 'DELETE'
+  headers?: any
 }
 
 export const CHAT_SERVICE = {
-  async MAKE_REQUEST({ id, key, method }: Param) {
-    const endpoint = new URL(`${process.env.NEXTAUTH_URL}/api/chat`)
+  async MAKE_REQUEST({
+    id,
+    key,
+    method,
+    headers = { 'Content-Type': 'application/json' }
+  }: Param) {
+    const endpoint = new URL(`${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/chat`)
 
-    if (method === 'GET') {
+    if (['GET', 'DELETE'].includes(method)) {
       endpoint.searchParams.append('key', key)
 
       if (id) {
@@ -22,10 +28,10 @@ export const CHAT_SERVICE = {
     try {
       const response = await fetch(endpoint.href, {
         method,
-        ...(method !== 'GET' && { body: JSON.stringify({ id, key }) }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        ...(method === 'POST' && {
+          body: JSON.stringify({ id, key })
+        }),
+        headers: headers
       })
 
       const data = await response.json()

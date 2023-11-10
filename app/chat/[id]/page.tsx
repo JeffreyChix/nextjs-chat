@@ -1,4 +1,5 @@
 import { type Metadata } from 'next'
+import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 
 import { auth } from '@/auth'
@@ -27,7 +28,8 @@ export async function generateMetadata({
   const chat = await CHAT_SERVICE.MAKE_REQUEST({
     id: params.id,
     key: CHAT_REQUEST_KEYS.GET_CHAT,
-    method: 'GET'
+    method: 'GET',
+    headers: headers()
   })
 
   return {
@@ -45,7 +47,8 @@ export default async function ChatPage({ params }: ChatPageProps) {
   const chat = await CHAT_SERVICE.MAKE_REQUEST({
     id: params.id,
     key: CHAT_REQUEST_KEYS.GET_CHAT,
-    method: 'GET'
+    method: 'GET',
+    headers: headers()
   })
 
   if (!chat) {

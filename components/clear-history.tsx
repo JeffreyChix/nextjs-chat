@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
-import { revalidatePath } from 'next/cache'
 import { toast } from 'react-hot-toast'
 
 import { CHAT_REQUEST_KEYS } from '@/lib/types'
@@ -54,14 +53,15 @@ export function ClearHistory() {
                   method: 'DELETE'
                 })
 
-                if (result && 'error' in result) {
+                if (typeof result !== 'boolean' && 'error' in result) {
                   toast.error(result.error)
                   return
                 }
 
                 setOpen(false)
+                router.refresh()
                 router.push('/')
-                revalidatePath('/')
+                toast.success('History cleared!')
               })
             }}
           >

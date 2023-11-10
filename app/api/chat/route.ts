@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose, { isValidObjectId } from 'mongoose'
 import { OpenAIStream, StreamingTextResponse } from 'ai'
 import { Configuration, OpenAIApi } from 'openai-edge'
 
@@ -15,11 +15,10 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration)
 
 const prepParams = async (req: Request) => {
-  if (req.method.toUpperCase() === 'GET') {
+  if (['GET', 'DELETE'].includes(req.method.toUpperCase())) {
     const requestUrl = new URL(req.url)
     const id = requestUrl.searchParams.get('id')
     const key = requestUrl.searchParams.get('key')
-
     return { id, key }
   }
 
@@ -69,7 +68,22 @@ export async function POST(req: Request) {
         ]
       }
 
-      await ChatModel.findOneAndUpdate()
+      if (json.id && isValidObjectId(json.id)) {
+        await ChatModel.findOneAndUpdate(
+          {
+            _id: new mongoose.Types.ObjectId(json.id),
+            userId: new mongoose.Types.ObjectId(userId)
+          },
+          {
+            $set: payload,
+            $setOnInsert: { _id: new mongoose.Types.ObjectId(json.id) }
+          },
+          { upsert: true }
+        )
+      } else {
+        //! May never occur!
+        await ChatModel.create(payload)
+      }
     }
   })
 
@@ -98,19 +112,27 @@ export async function GET(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const userId = (await auth())?.user.id
+
+  if (!userId) {
+    return Response.json({
+      error: 'Unauthorized!'
+    })
+  }
+
   await connectToDB()
 
   const json = await prepParams(req)
 
   switch (json.key) {
     case CHAT_REQUEST_KEYS.REMOVE_CHAT: {
-      const data = await removeChat(json.id)
+      const data = await removeChat(json.id, userId)
 
       return Response.json(data)
     }
 
     case CHAT_REQUEST_KEYS.CLEAR_CHATS: {
-      const data = await clearChats()
+      const data = await clearChats(userId)
 
       return Response.json(data)
     }
