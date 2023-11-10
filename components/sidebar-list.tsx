@@ -6,11 +6,18 @@ import { CHAT_SERVICE } from '@/service/chat'
 import { CHAT_REQUEST_KEYS, Chat } from '@/lib/types'
 
 export async function SidebarList() {
-  const chats = (await CHAT_SERVICE.MAKE_REQUEST({
-    key: CHAT_REQUEST_KEYS.GET_CHATS,
-    method: 'GET',
-    headers: headers()
-  })) as Chat[]
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/chat?key=${CHAT_REQUEST_KEYS.GET_CHATS}`,
+    { headers: headers() }
+  )
+
+  const chats = (await response.json()) as Chat[]
+  
+  // const chats = (await CHAT_SERVICE.MAKE_REQUEST({
+  //   key: CHAT_REQUEST_KEYS.GET_CHATS,
+  //   method: 'GET',
+  //   headers: headers()
+  // })) as Chat[]
 
   return (
     <div className="flex-1 overflow-auto">

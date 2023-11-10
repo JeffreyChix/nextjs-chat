@@ -31,7 +31,7 @@ export const CHAT_SERVICE = {
         ...(method === 'POST' && {
           body: JSON.stringify({ id, key })
         }),
-        headers: headers
+        headers
       })
 
       const data = await response.json()

@@ -25,12 +25,19 @@ export async function generateMetadata({
     return {}
   }
 
-  const chat = await CHAT_SERVICE.MAKE_REQUEST({
-    id: params.id,
-    key: CHAT_REQUEST_KEYS.GET_CHAT,
-    method: 'GET',
-    headers: headers()
-  })
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/chat?key=${CHAT_REQUEST_KEYS.GET_CHAT}&id=${params.id}`,
+    { headers: headers() }
+  )
+
+  const chat = await response.json()
+
+  // const chat = await CHAT_SERVICE.MAKE_REQUEST({
+  //   id: params.id,
+  //   key: CHAT_REQUEST_KEYS.GET_CHAT,
+  //   method: 'GET',
+  //   headers: headers()
+  // })
 
   return {
     title: chat?.title.toString().slice(0, 50) ?? 'Chat'
