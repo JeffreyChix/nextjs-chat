@@ -1,5 +1,3 @@
-'use server'
-
 import { headers } from 'next/headers'
 
 import { SidebarActions } from '@/components/sidebar-actions'
