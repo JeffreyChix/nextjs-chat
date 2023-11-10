@@ -15,11 +15,3 @@ export type ServerActionResult<Result> = Promise<
       error: string
     }
 >
-
-export enum CHAT_REQUEST_KEYS {
-  NEW_CHAT = 'NEW_CHAT',
-  GET_CHAT = 'GET_CHAT',
-  GET_CHATS = 'GET_CHATS',
-  REMOVE_CHAT = 'REMOVE_CHAT',
-  CLEAR_CHATS = 'CLEAR_CHATS'
-}

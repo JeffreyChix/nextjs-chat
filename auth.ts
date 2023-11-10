@@ -49,12 +49,13 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async jwt({ token, profile, user, account }) {
       if (profile) {
-        token.image = (profile as any)?.picture ?? (profile as any)?.avatar_url
+        token.picture =
+          (profile as any)?.picture ?? (profile as any)?.avatar_url
         token.provider = account?.provider
       }
 
       if (user && !profile) {
-        token.image = (user as any)?.picture
+        token.picture = (user as any)?.picture
         token.provider = account?.provider
       }
 
@@ -65,6 +66,7 @@ export const authOptions: AuthOptions = {
 
       if (updatedUser && updatedUser?._id) {
         session.user.id = updatedUser._id
+        session.user.image = token.picture
       }
 
       return session

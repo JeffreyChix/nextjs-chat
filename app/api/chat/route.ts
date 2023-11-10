@@ -3,11 +3,9 @@ import mongoose, { isValidObjectId } from 'mongoose'
 import { OpenAIStream, StreamingTextResponse } from 'ai'
 import { Configuration, OpenAIApi } from 'openai-edge'
 
-import { CHAT_REQUEST_KEYS } from '@/lib/types'
 import { connectToDB } from '@/lib/connectToMongoDB'
-import { getChat, getChats, removeChat, clearChats } from '@/app/actions'
-import ChatModel from '@/model/chat'
 import { authOptions } from '@/auth'
+import ChatModel from '@/model/chat'
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY
@@ -15,25 +13,12 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration)
 
-const prepParams = async (req: Request) => {
-  if (['GET', 'DELETE'].includes(req.method.toUpperCase())) {
-    const requestUrl = new URL(req.url)
-    const id = requestUrl.searchParams.get('id')
-    const key = requestUrl.searchParams.get('key')
-    return { id, key }
-  }
-
-  const json = await req.json()
-
-  return json
-}
-
 export async function POST(req: Request) {
   await connectToDB()
 
   const session = await getServerSession(authOptions)
 
-  const json = await prepParams(req)
+  const json = await req.json()
   const userId = session?.user.id
 
   const { messages, previewToken } = json
@@ -91,55 +76,4 @@ export async function POST(req: Request) {
   })
 
   return new StreamingTextResponse(stream)
-}
-
-export async function GET(req: Request) {
-  await connectToDB()
-  const session = await getServerSession(authOptions)
-
-  const json = await prepParams(req)
-  const userId = session?.user.id
-
-  switch (json.key) {
-    case CHAT_REQUEST_KEYS.GET_CHAT: {
-      const data = await getChat(json.id, userId as string)
-
-      return Response.json(data)
-    }
-
-    case CHAT_REQUEST_KEYS.GET_CHATS: {
-      const data = await getChats(userId)
-
-      return Response.json(data)
-    }
-  }
-}
-
-export async function DELETE(req: Request) {
-  const session = await getServerSession(authOptions)
-  const userId = session?.user.id as string
-
-  if (!userId) {
-    return Response.json({
-      error: 'Unauthorized!'
-    })
-  }
-
-  await connectToDB()
-
-  const json = await prepParams(req)
-
-  switch (json.key) {
-    case CHAT_REQUEST_KEYS.REMOVE_CHAT: {
-      const data = await removeChat(json.id, userId)
-
-      return Response.json(data)
-    }
-
-    case CHAT_REQUEST_KEYS.CLEAR_CHATS: {
-      const data = await clearChats(userId)
-
-      return Response.json(data)
-    }
-  }
 }

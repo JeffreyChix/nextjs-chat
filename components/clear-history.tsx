@@ -4,7 +4,6 @@ import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 
-import { CHAT_REQUEST_KEYS } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import {
   AlertDialog,
@@ -18,7 +17,7 @@ import {
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
 import { IconSpinner } from '@/components/ui/icons'
-import { CHAT_SERVICE } from '@/service/chat'
+import { clearChats } from '@/app/actions'
 
 export function ClearHistory() {
   const [open, setOpen] = React.useState(false)
@@ -48,10 +47,7 @@ export function ClearHistory() {
             onClick={event => {
               event.preventDefault()
               startTransition(async () => {
-                const result = await CHAT_SERVICE.MAKE_REQUEST({
-                  key: CHAT_REQUEST_KEYS.CLEAR_CHATS,
-                  method: 'DELETE'
-                })
+                const result = await clearChats()
 
                 if (typeof result !== 'boolean' && 'error' in result) {
                   toast.error(result.error)

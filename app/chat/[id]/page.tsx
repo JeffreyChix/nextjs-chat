@@ -1,13 +1,10 @@
 import { type Metadata } from 'next'
-import { headers } from 'next/headers'
 import { getServerSession } from 'next-auth'
 import { notFound, redirect } from 'next/navigation'
 
-import { handler } from '@/auth'
 import { Chat } from '@/components/chat'
-import { CHAT_SERVICE } from '@/service/chat'
-import { CHAT_REQUEST_KEYS } from '@/lib/types'
 import { authOptions } from '@/auth'
+import { getChat } from '@/app/actions'
 
 export interface ChatPageProps {
   params: {
@@ -24,12 +21,7 @@ export async function generateMetadata({
     return {}
   }
 
-  const chat = await CHAT_SERVICE.MAKE_REQUEST({
-    id: params.id,
-    key: CHAT_REQUEST_KEYS.GET_CHAT,
-    method: 'GET',
-    headers: headers()
-  })
+  const chat = await getChat(params.id)
 
   return {
     title: chat?.title.toString().slice(0, 50) ?? 'Chat'
@@ -43,12 +35,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
     redirect(`/sign-in?next=/chat/${params.id}`)
   }
 
-  const chat = await CHAT_SERVICE.MAKE_REQUEST({
-    id: params.id,
-    key: CHAT_REQUEST_KEYS.GET_CHAT,
-    method: 'GET',
-    headers: headers()
-  })
+  const chat = await getChat(params.id)
 
   if (!chat) {
     notFound()

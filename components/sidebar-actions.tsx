@@ -4,8 +4,7 @@ import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 
-import { CHAT_REQUEST_KEYS, type Chat } from '@/lib/types'
-import { cn, formatDate } from '@/lib/utils'
+import { type Chat } from '@/lib/types'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,23 +16,13 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog'
-import { IconSpinner, IconTrash, IconUsers } from '@/components/ui/icons'
-import Link from 'next/link'
-import { badgeVariants } from '@/components/ui/badge'
+import { IconSpinner, IconTrash } from '@/components/ui/icons'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import { CHAT_SERVICE } from '@/service/chat'
+import { removeChat } from '@/app/actions'
 
 interface SidebarActionsProps {
   chat: Chat
@@ -81,11 +70,7 @@ export function SidebarActions({ chat }: SidebarActionsProps) {
               onClick={event => {
                 event.preventDefault()
                 startRemoveTransition(async () => {
-                  const result = await CHAT_SERVICE.MAKE_REQUEST({
-                    id: chat._id,
-                    key: CHAT_REQUEST_KEYS.REMOVE_CHAT,
-                    method: 'DELETE'
-                  })
+                  const result = await removeChat(chat._id)
 
                   if (typeof result !== 'boolean' && 'error' in result) {
                     toast.error(result.error)
