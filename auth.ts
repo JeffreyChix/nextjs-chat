@@ -1,4 +1,4 @@
-import NextAuth, { type DefaultSession } from 'next-auth'
+import NextAuth, { type DefaultSession, type AuthOptions } from 'next-auth'
 import GitHub from 'next-auth/providers/github'
 import Google from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
@@ -9,18 +9,17 @@ import { USER_SERVICE } from './service/user'
 declare module 'next-auth' {
   interface Session {
     user: {
-      /** The user's id. */
       id: string
     } & DefaultSession['user']
   }
 }
 
-export const {
-  handlers: { GET, POST },
-  auth
-} = NextAuth({
+export const authOptions: AuthOptions = {
   providers: [
-    GitHub,
+    GitHub({
+      clientId: process.env.AUTH_GITHUB_ID as string,
+      clientSecret: process.env.AUTH_GITHUB_SECRET as string
+    }),
     Google({ clientId: GOOGLE_CLIENT_ID, clientSecret: GOOGLE_CLIENT_SECRET }),
     CredentialsProvider({
       id: 'googleonetap',
@@ -44,30 +43,13 @@ export const {
       }
     })
   ],
-  secret: process.env.NEXT_PUBLIC_AUTH_SECRET,
-  session: {
-    strategy: 'jwt'
-  },
-  jwt: {
-    secret: process.env.NEXT_PUBLIC_AUTH_SECRET
-  },
   theme: {
     colorScheme: 'light'
   },
   callbacks: {
     async jwt({ token, profile, user, account }) {
-      const updatedUser = await USER_SERVICE.DB_UPDATE_USER({
-        user,
-        account,
-        profile
-      })
-
-      if (updatedUser && updatedUser?._id) {
-        token.id = updatedUser._id
-      }
-
       if (profile) {
-        token.image = profile?.picture ?? profile?.avatar_url
+        token.image = (profile as any)?.picture ?? (profile as any)?.avatar_url
         token.provider = account?.provider
       }
 
@@ -78,11 +60,19 @@ export const {
 
       return token
     },
-    authorized({ auth }) {
-      return !!auth?.user
+    async session({ session, token }) {
+      const updatedUser = await USER_SERVICE.DB_UPDATE_USER(token)
+
+      if (updatedUser && updatedUser?._id) {
+        session.user.id = updatedUser._id
+      }
+
+      return session
     }
   },
   pages: {
     signIn: '/sign-in'
   }
-})
+}
+
+export const handler = NextAuth(authOptions)

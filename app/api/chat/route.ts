@@ -1,12 +1,13 @@
+import { getServerSession } from 'next-auth'
 import mongoose, { isValidObjectId } from 'mongoose'
 import { OpenAIStream, StreamingTextResponse } from 'ai'
 import { Configuration, OpenAIApi } from 'openai-edge'
 
-import { auth } from '@/auth'
 import { CHAT_REQUEST_KEYS } from '@/lib/types'
 import { connectToDB } from '@/lib/connectToMongoDB'
 import { getChat, getChats, removeChat, clearChats } from '@/app/actions'
 import ChatModel from '@/model/chat'
+import { authOptions } from '@/auth'
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY
@@ -30,8 +31,10 @@ const prepParams = async (req: Request) => {
 export async function POST(req: Request) {
   await connectToDB()
 
+  const session = await getServerSession(authOptions)
+
   const json = await prepParams(req)
-  const userId = (await auth())?.user.id
+  const userId = session?.user.id
 
   const { messages, previewToken } = json
 
@@ -92,13 +95,14 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
   await connectToDB()
+  const session = await getServerSession(authOptions)
 
   const json = await prepParams(req)
-  const userId = (await auth())?.user.id
+  const userId = session?.user.id
 
   switch (json.key) {
     case CHAT_REQUEST_KEYS.GET_CHAT: {
-      const data = await getChat(json.id, userId)
+      const data = await getChat(json.id, userId as string)
 
       return Response.json(data)
     }
@@ -112,7 +116,8 @@ export async function GET(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const userId = (await auth())?.user.id
+  const session = await getServerSession(authOptions)
+  const userId = session?.user.id as string
 
   if (!userId) {
     return Response.json({
